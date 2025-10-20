@@ -1,135 +1,11 @@
-export class AudioPlayer {
-  constructor(container, options = {}) {
-    const {showProgress = false, showVolume = true } = options;
-    this.showProgress = showProgress;
-    this.showVolume = showVolume;
+// --- Global shared audio cache ---
+const audioCache = new Map();
 
-    this.container = container;
-    this.audio = container.querySelector('audio');
-    this.playPauseBtn = container.querySelector('#play-pause');
-    this.muteBtn = container.querySelector('#mute-toggle');
-    this.volumeSlider = container.querySelector('#volume-slider');
-    this.progressSlider = container.querySelector('#progress-slider');
-    this.timeDisplay = container.querySelector('#time-display');
-
-    this.lastVolume = 1;
-    this.rafId = null;
-
-    this.init();
-  }
-
-  init() {
-    // Load saved volume per track
-    const key = this.getStorageKey();
-    const savedVolume = localStorage.getItem(key);
-    if (savedVolume !== null) {
-      this.audio.volume = parseFloat(savedVolume);
-      this.volumeSlider.value = savedVolume;
-      this.updateMuteIcon(this.audio.volume);
-    }
-
-    // Events
-    this.playPauseBtn.addEventListener('click', () => this.togglePlay());
-    this.audio.addEventListener('play', () => this.onPlay());
-    this.audio.addEventListener('pause', () => this.onPause());
-    this.audio.addEventListener('ended', () => this.onEnd());
-    this.audio.addEventListener('loadedmetadata', () => this.updateTimeDisplay());
-
-    this.volumeSlider.addEventListener('input', () => this.setVolume());
-    this.muteBtn.addEventListener('click', () => this.toggleMute());
-    if (this.showProgress) {
-      this.progressSlider.addEventListener('input', () => this.seek());
-    }
-    // If metadata loads later
-    this.audio.addEventListener('durationchange', () => this.updateTimeDisplay());
-  }
-
-  getStorageKey() {
-    // Unique key based on player identifier
-    return `playerVolume::${this.container.dataset.player}`;
-  }
-
-  togglePlay() {
-    if (this.audio.paused) {
-      this.audio.play();
-    } else {
-      this.audio.pause();
-    }
-  }
-
-  onPlay() {
-    this.playPauseBtn.textContent = '⏸️';
-    this.playPauseBtn.setAttribute('aria-label', 'Pause');
-    this.updateProgressSmooth();
-  }
-
-  onPause() {
-    this.playPauseBtn.textContent = '▶️';
-    this.playPauseBtn.setAttribute('aria-label', 'Play');
-    cancelAnimationFrame(this.rafId);
-  }
-
-  onEnd() {
-    this.progressSlider.value = 0;
-    this.playPauseBtn.textContent = '▶️';
-    const current = this.formatTime(0);
-    const total = this.formatTime(this.audio.duration);
-    this.timeDisplay.textContent = `${current} / ${total}`;
-    cancelAnimationFrame(this.rafId);
-  }
-
-  setVolume() {
-    const v = parseFloat(this.volumeSlider.value);
-    this.audio.volume = v;
-    localStorage.setItem(this.getStorageKey(), v);
-    this.updateMuteIcon(v);
-  }
-
-  toggleMute() {
-    if (this.audio.volume > 0) {
-      this.lastVolume = this.audio.volume;
-      this.audio.volume = 0;
-      this.volumeSlider.value = 0;
-    } else {
-      this.audio.volume = this.lastVolume || 1;
-      this.volumeSlider.value = this.audio.volume;
-    }
-    localStorage.setItem(this.getStorageKey(), this.audio.volume);
-    this.updateMuteIcon(this.audio.volume);
-  }
-
-  updateMuteIcon(v) {
-    if (v === 0) this.muteBtn.textContent = '🔇';
-    else if (v < 0.5) this.muteBtn.textContent = '🔉';
-    else this.muteBtn.textContent = '🔊';
-  }
-
-  formatTime(seconds) {
-    if (isNaN(seconds)) return "00:00";
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  }
-
-  updateTimeDisplay() {
-    const current = this.formatTime(this.audio.currentTime);
-    const total = this.formatTime(this.audio.duration);
-    this.timeDisplay.textContent = `${current} / ${total}`;
-  }
-
-  updateProgressSmooth() {
-    const progress = (this.audio.currentTime / this.audio.duration) * 100;
-    this.progressSlider.value = progress || 0;
-    this.updateTimeDisplay();
-    this.rafId = requestAnimationFrame(() => this.updateProgressSmooth());
-  }
-
-  seek() {
-    const seekTime = (this.progressSlider.value / 100) * this.audio.duration;
-    this.audio.currentTime = seekTime;
-  }
-}
-
+/**
+ * Create a custom audio player inside a container
+ * @param {HTMLElement} container
+ * @param {Object} options
+ */
 export function createAudioPlayer(container, options = {}) {
   const {
     showProgress = true,
@@ -140,13 +16,12 @@ export function createAudioPlayer(container, options = {}) {
   } = options;
 
   // --- Clear container ---
-  container.innerHTML = '';
+  container.replaceChildren();
 
   // --- Create elements ---
   const audio = document.createElement('audio');
   audio.id = playerId;
   audio.dataset.player = playerId;
-  if (src) audio.src = src;
   audio.preload = 'metadata';
   container.append(audio);
 
@@ -308,8 +183,27 @@ export function createAudioPlayer(container, options = {}) {
     audio.currentTime = seekTime;
   };
 
+  // --- New Feature: Cached Audio Source ---
+  async function setSource(url) {
+    if (!url) return;
+
+    // Reuse cached blob URL if available
+    if (audioCache.has(url)) {
+      audio.src = audioCache.get(url);
+      return;
+    }
+
+    // Otherwise fetch and cache
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to load audio: ${url}`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    audioCache.set(url, blobUrl);
+    audio.src = blobUrl;
+  }
+
   // --- Initialization ---
-  const init = () => {
+  const init = async () => {
     const savedVolume = localStorage.getItem(getStorageKey());
     if (savedVolume !== null && showVolume) {
       audio.volume = parseFloat(savedVolume);
@@ -332,6 +226,8 @@ export function createAudioPlayer(container, options = {}) {
     if (showProgress) {
       progressSlider.addEventListener('input', seek);
     }
+
+    if (src) await setSource(src);
   };
 
   init();
@@ -343,6 +239,7 @@ export function createAudioPlayer(container, options = {}) {
     toggleMute,
     setVolume,
     seek,
+    setSource, // 👈 new method to switch track efficiently
     updateTimeDisplay,
     destroy: () => {
       playPauseBtn.removeEventListener('click', togglePlay);

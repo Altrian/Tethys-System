@@ -40,6 +40,38 @@ export function initializeRadioGroup(radioGroupId, defaultValue = null, onChange
 	console.log("Initialized radio group:", radioGroupId);
 }
 
+export function populateRadioGroup(containerSelector, dataObj, groupName) {
+	const container = document.querySelector(containerSelector);
+	if (!container) return;
+
+	// Clear previous content
+	container.replaceChildren();
+
+	for (const [key, labelText] of Object.entries(dataObj)) {
+		const label = document.createElement('label');
+		label.className = 'btn medium btn-radio';
+		label.setAttribute('role', 'radio');
+		label.setAttribute('tabindex', '0');
+		label.setAttribute('aria-checked', 'false');
+
+		const span = document.createElement('span');
+		span.className = 'radio-content radio-text';
+		span.textContent = labelText;
+
+		const input = document.createElement('input');
+		input.type = 'radio';
+		input.id = key.toLowerCase();
+		input.name = groupName;
+		input.value = labelText;
+		input.className = 'radio-input';
+		input.hidden = true;
+
+		span.appendChild(input);
+		label.appendChild(span);
+		container.appendChild(label);
+	}
+}
+
 export function initializeCheckbox(checkboxId, onChangeCallback = null) {
 	const label = document.querySelector(`label[for="${checkboxId}"]`);
 	const checkbox = document.getElementById(checkboxId);

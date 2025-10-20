@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark dracula">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,9 @@
     <script type="module" src="static/src/script.js"></script>
     <meta name="theme-color" content="#282a36" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#282a36" media="(prefers-color-scheme: dark)">
+
 </html>
+
 <body>
     <div class="header-sentinel"></div>
     <section class="toast-notifications">
@@ -66,23 +69,27 @@
                             <div class="game-title">Wuthering Quizz</div>
                             <div class="game-subtitle">Which character say this?</div>
                             <div class="game-content quote-game" data-hint-lang="false">
-                                <span class="quote">"Jackpot"</span>
-                                <div class="toggle-group lang-radio" role="radiogroup"
-                                    aria-labelledby="va-lang-select">
+                                <span class="quote"></span>
+                                <div class="toggle-group lang-radio" role="radiogroup" aria-labelledby="va-lang-select">
                                 </div>
-                                <button class="btn va-name-btn hint-one">
-                                    <span class="btn-text va-label">Va Name in 3 tries</span>
-                                </button>
-                                <button class="btn hint-two">
-                                    <span class="btn-text va-label">Va Name in 5 tries</span>
-                                </button>
+                                <div class="hint-one">
+                                    <button class="btn extra-large btn-text va-name-btn">
+                                        <span class="btn-text va-label"></span>
+                                    </button>
+                                </div>
+                                <div class="hint-two">
+                                    <button class="btn extra-large btn-text va-name-btn">
+                                        <span class="btn-text va-label"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="game-answers">
                             <div class="guessbox">
-                                <form class="input-form" id="" role="search" aria-label="">
-                                    <input type="text" id="guess-input" placeholder="Search character name"
-                                        autocomplete="off">
+                                <form class="input-form" id="guess-input-form" role="search" aria-label="">
+                                    <input type="text" id="guess-input" popovertarget="guess-input-popover"
+                                        placeholder="Search character name" autocomplete="off"
+                                        aria-controls="suggestions-list">
                                     <div class="input-border"></div>
                                     <div class="search-icon">
                                         <svg class="icon small" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -96,13 +103,13 @@
                                         <span class="hint-icon">Ctrl</span>
                                         <span class="hint-icon">K</span>
                                     </div>
+                                    <div id="guess-input-popover" popover anchor="guess-input"
+                                        class="popover suggestions">
+                                        <ul id="suggestions-list"></ul>
+                                    </div>
                                 </form>
                             </div>
-                            <btn class="btn add-answer-btn">
-                                <span class="btn-text">Add Answer</span>
-                            </btn>
-                            <div class="answers-container">
-                            </div>
+                            <ul class="answers-container"></ul>
                         </div>
                         <div class="game-tracker"></div>
                     </div>
