@@ -766,6 +766,10 @@ small {
 .quote-game .hint-one, .quote-game .hint-two {
   display: flex;
   justify-content: center;
+
+  .btn {
+    width: 100%;
+  }
 }
 
 .quote-game .hint-one {

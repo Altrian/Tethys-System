@@ -1,3 +1,4 @@
+import { formatDialogueText } from './text-formatter.mjs';
 import { createAudioPlayer } from './player.mjs';
 import { populateRadioGroup, initializeRadioGroup } from './input.mjs';
 
@@ -55,6 +56,45 @@ const SharedTryController = (() => {
 
     return { register, decrementAll };
 })();
+const ElementHiderById = (() => {
+  const storage = new Map(); // id => { element, parent, next, placeholder }
+
+  return {
+    register(id, element) {
+      if (!id || !element) throw new Error('Provide id and element');
+      storage.set(id, { element });
+    },
+
+    hide(id) {
+      const info = storage.get(id);
+      if (!info) return;
+      const { element } = info;
+      if (!element.parentNode) return; // already hidden
+
+      const placeholder = document.createComment(`placeholder-${id}`);
+      info.parent = element.parentNode;
+      info.next = element.nextSibling;
+      info.placeholder = placeholder;
+
+      element.parentNode.replaceChild(placeholder, element);
+    },
+
+    show(id) {
+      const info = storage.get(id);
+      if (!info) return;
+      const { element, parent, next, placeholder } = info;
+      if (!placeholder || !parent) return;
+
+      parent.insertBefore(element, next);
+      placeholder.remove();
+
+      delete info.parent;
+      delete info.next;
+      delete info.placeholder;
+    }
+  };
+})();
+
 window.SharedTryController = SharedTryController;
 
 function finishGame(characterId, name, result) {
@@ -130,10 +170,11 @@ function finishGame(characterId, name, result) {
         return resultElement;
     }
     requestAnimationFrame(() => {
-        quoteGame.appendChild(createResultElement(characterId, name, result))
+        quoteGame.appendChild(createResultElement(characterId, name, result, () => {
+            resetQuoteGame();
+        }));
     })
-    const guessBox = document.querySelector('.guessbox');
-    guessBox.remove();
+    ElementHiderById.hide(1)
 }
 
 function setupInputLogic() {
@@ -258,6 +299,7 @@ function setupInputLogic() {
         input.value = name;
         input.value = '';
         pop.hidePopover();
+        remainingTries--;
         console.log(`Character: ${name} selected`);
         if (id === selectedQuote.RoleId) {
             console.log("victory");
@@ -273,7 +315,6 @@ function setupInputLogic() {
         insertGuess('.answers-container', { characterId: id, characterName: name });
         used.add(id);
         SharedTryController.decrementAll();
-        remainingTries--;
     }
 
     // --- Event handling ---
@@ -436,6 +477,7 @@ function resetQuoteGame() {
     const [btnOneEl, btnTwoEl] = setupQuoteHint(quoteGame);
     hintOneContainer.replaceChildren(btnOneEl);
     hintTwoContainer.replaceChildren(btnTwoEl);
+    ElementHiderById.show(1)
     setupQuoteGame();
 }
 
@@ -447,7 +489,7 @@ async function setupQuoteGame() {
     const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
     const jsonFile = await fetch(`/public/static/data/json/characters/${characterId}.json`).then(res => res.json());
     selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
-    document.querySelector('.quote').textContent = selectedQuote.Content;
+    document.querySelector('.quote').replaceChildren(formatDialogueText(selectedQuote.Content));
 }
 
 export function InitializeQuoteGame() {
@@ -489,6 +531,8 @@ export function InitializeQuoteGame() {
         'chinese': 'Chinese',
         'korean': 'Korean'
     };
+    const guessBox = document.querySelector('.guessbox');
+    ElementHiderById.register(1, guessBox);
     populateQuoteGame('.game-content')
     setupInputLogic();
     populateRadioGroup('.lang-radio', langs, 'va-lang');
@@ -506,7 +550,6 @@ export function InitializeQuoteGame() {
         if (audioPlayer) {
             audioPlayer.setSource(`/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[value]}.mp3`);
         }
-
     });
     setupQuoteGame();
     window.resetQuoteGame = resetQuoteGame;

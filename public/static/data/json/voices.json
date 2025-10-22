@@ -1,0 +1,682 @@
+[
+  {
+    "Name": "Aalto",
+    "English": "James Day",
+    "Chinese": {
+      "name": "Liang Dawei",
+      "original": "梁达伟"
+    },
+    "Japanese": {
+      "name": "Iwasaki Ryōta",
+      "original": "岩崎諒太"
+    },
+    "Korean": {
+      "name": "Lim Chae-bin",
+      "original": "임채빈"
+    },
+    "Id": 1403
+  },
+  {
+    "Name": "Augusta",
+    "English": "Alix Wilton Regan",
+    "Chinese": {
+      "name": "Mu Xueting",
+      "original": "穆雪婷"
+    },
+    "Japanese": {
+      "name": "Hikasa Yōko",
+      "original": "日笠陽子"
+    },
+    "Korean": {
+      "name": "Lee Ji-hyun",
+      "original": "이지현"
+    },
+    "Id": 1306
+  },
+  {
+    "Name": "Baizhi",
+    "English": "Samantha Dakin",
+    "Chinese": {
+      "name": "Chen Tingting",
+      "original": "陈婷婷"
+    },
+    "Japanese": {
+      "name": "Seto Asami",
+      "original": "瀬戸麻沙美"
+    },
+    "Korean": {
+      "name": "Seong Ye-won",
+      "original": "성예원"
+    },
+    "Id": 1103
+  },
+  {
+    "Name": "Brant",
+    "English": "Hyoie O'Grady",
+    "Chinese": {
+      "name": "Moran",
+      "original": "莫然"
+    },
+    "Japanese": {
+      "name": "Kishio Daisuke",
+      "original": "岸尾だいすけ"
+    },
+    "Korean": {
+      "name": "Lee Ju-seung",
+      "original": "이주승"
+    },
+    "Id": 1206
+  },
+  {
+    "Name": "Calcharo",
+    "English": "Ben Cura",
+    "Chinese": {
+      "name": "Xu Xiang",
+      "original": "徐翔"
+    },
+    "Japanese": {
+      "name": "Toshiyuki Morikawa",
+      "original": "森川智之"
+    },
+    "Korean": {
+      "name": "Park Min-gi",
+      "original": "박민기"
+    },
+    "Id": 1301
+  },
+  {
+    "Name": "Camellya",
+    "English": "Meaghan Martin",
+    "Chinese": {
+      "name": "Liu Zhixiao",
+      "original": "柳知萧"
+    },
+    "Japanese": {
+      "name": "Ise Mariya",
+      "original": "伊瀬茉莉也"
+    },
+    "Korean": {
+      "name": "Yu Hye-ji",
+      "original": "유혜지"
+    },
+    "Id": 1603
+  },
+  {
+    "Name": "Cantarella",
+    "English": "Alexandra Guelff",
+    "Chinese": {
+      "name": "Xiao Mi",
+      "original": "小米"
+    },
+    "Japanese": {
+      "name": "Nakahara Mai",
+      "original": "中原麻衣"
+    },
+    "Korean": {
+      "name": "Kim Yul",
+      "original": "김율"
+    },
+    "Id": 1607
+  },
+  {
+    "Name": "Carlotta",
+    "English": "Jennifer English",
+    "Chinese": {
+      "name": "Yan Yeqiao",
+      "original": "闫夜桥"
+    },
+    "Japanese": {
+      "name": "Ueda Kana",
+      "original": "植田佳奈"
+    },
+    "Korean": {
+      "name": "Kim Soon-mi",
+      "original": "김순미"
+    },
+    "Id": 1107
+  },
+  {
+    "Name": "Cartethyia",
+    "English": "Amanda Elizabeth Rischel",
+    "Chinese": {
+      "name": "Yun He Zhui",
+      "original": "云鹤追"
+    },
+    "Japanese": {
+      "name": "Asakawa Yū",
+      "original": "浅川悠"
+    },
+    "Korean": {
+      "name": "Bae Ha-gyoung",
+      "original": "배하경"
+    },
+    "Id": 1409
+  },
+  {
+    "Name": "Changli",
+    "English": "Ashleigh Haddad",
+    "Chinese": {
+      "name": "Mufei",
+      "original": "沐霏"
+    },
+    "Japanese": {
+      "name": "Saitō Chiwa",
+      "original": "斎藤千和"
+    },
+    "Korean": {
+      "name": "Shin Nari",
+      "original": "신나리"
+    },
+    "Id": 1205
+  },
+  {
+    "Name": "Chixia",
+    "English": "Harriet Carmichael",
+    "Chinese": {
+      "name": "Cai Na",
+      "original": "蔡娜"
+    },
+    "Japanese": {
+      "name": "Nagase Anna",
+      "original": "永瀬アンナ"
+    },
+    "Korean": {
+      "name": "Kang Eun-ae",
+      "original": "강은애"
+    },
+    "Id": 1202
+  },
+  {
+    "Name": "Ciaccona",
+    "English": "Rebecca Hanssen",
+    "Chinese": {
+      "name": "Ye Zhiqiu",
+      "original": "叶知秋"
+    },
+    "Japanese": {
+      "name": "Hasegawa Ikumi",
+      "original": "長谷川育美"
+    },
+    "Korean": {
+      "name": "Kim Ye-rim",
+      "original": "김예림"
+    },
+    "Id": 1407
+  },
+  {
+    "Name": "Danjin",
+    "English": "Sophie Colquhoun",
+    "Chinese": {
+      "name": "Yi Kou Jing",
+      "original": "一口井"
+    },
+    "Japanese": {
+      "name": "Okasaki Miho",
+      "original": "岡咲美保"
+    },
+    "Korean": {
+      "name": "Lee Hyunjin",
+      "original": "이현진"
+    },
+    "Id": 1602
+  },
+  {
+    "Name": "Encore",
+    "English": "Carina Reeves",
+    "Chinese": {
+      "name": "Xiao Sibai",
+      "original": "皛四白"
+    },
+    "Japanese": {
+      "name": "Ibuki Chikano",
+      "original": "伊吹誓乃"
+    },
+    "Korean": {
+      "name": "Serena Lee",
+      "original": "이세레나"
+    },
+    "Id": 1203
+  },
+  {
+    "Name": "Galbrena",
+    "English": "Devora Wilde",
+    "Chinese": {
+      "name": "Zhang Wenjie",
+      "original": "张文婕"
+    },
+    "Japanese": {
+      "name": "Shōji Umeka",
+      "original": "庄司宇芽香"
+    },
+    "Korean": {
+      "name": "Lee Da-seul",
+      "original": "이다슬"
+    },
+    "Id": 1208
+  },
+  {
+    "Name": "Iuno",
+    "English": "Ella Boyes",
+    "Chinese": {
+      "name": "Jiang Yingjun",
+      "original": "姜英俊"
+    },
+    "Japanese": {
+      "name": "Lynn",
+      "original": "りん"
+    },
+    "Korean": {
+      "name": "Yoon Eun Seo",
+      "original": "윤은서"
+    },
+    "Id": 1410
+  },
+  {
+    "Name": "Jianxin",
+    "English": "Ioanna Kimbook",
+    "Chinese": {
+      "name": "Yu Tou",
+      "original": "昱头"
+    },
+    "Japanese": {
+      "name": "Anzai Chika",
+      "original": "安済知佳"
+    },
+    "Korean": {
+      "name": "Lee Eunjo",
+      "original": "이은조"
+    },
+    "Id": 1405
+  },
+  {
+    "Name": "Jinhsi",
+    "English": "Anna Devlin",
+    "Chinese": {
+      "name": "Jiang Yue",
+      "original": "江月"
+    },
+    "Japanese": {
+      "name": "Aoyama Yoshino",
+      "original": "青山吉能"
+    },
+    "Korean": {
+      "name": "Park Ha-jin",
+      "original": "박하진"
+    },
+    "Id": 1304
+  },
+  {
+    "Name": "Jiyan",
+    "English": "Alex Jordan",
+    "Chinese": {
+      "name": "Sun Ye",
+      "original": "孙晔"
+    },
+    "Japanese": {
+      "name": "Ono Yūki",
+      "original": "小野友樹"
+    },
+    "Korean": {
+      "name": "Nam Doh-hyeong",
+      "original": "남도형"
+    },
+    "Id": 1404
+  },
+  {
+    "Name": "Lingyang",
+    "English": "Aleksander Varadian",
+    "Chinese": {
+      "name": "Jinli",
+      "original": "锦鲤"
+    },
+    "Japanese": {
+      "name": "Hanae Natsuki",
+      "original": "花江夏樹"
+    },
+    "Korean": {
+      "name": "Lee Sangho",
+      "original": "이상호"
+    },
+    "Id": 1104
+  },
+  {
+    "Name": "Lumi",
+    "English": "Emily Cass",
+    "Chinese": {
+      "name": "Jing Chen",
+      "original": "静宸"
+    },
+    "Japanese": {
+      "name": "Suzuki Minori",
+      "original": "鈴木みのり"
+    },
+    "Korean": {
+      "name": "Jeong Ha-eun",
+      "original": "정해은"
+    },
+    "Id": 1504
+  },
+  {
+    "Name": "Lupa",
+    "English": "Kaja Chan",
+    "Chinese": {
+      "name": "Shuo Xiaotu",
+      "original": "朔小兔"
+    },
+    "Japanese": {
+      "name": "Takahashi Minami",
+      "original": "髙橋ミナミ"
+    },
+    "Korean": {
+      "name": "Kim Ye-ryeong",
+      "original": "김예령"
+    },
+    "Id": 1207
+  },
+  {
+    "Name": "Mortefi",
+    "English": "Joseph May",
+    "Chinese": {
+      "name": "Liu Yijia",
+      "original": "刘以嘉"
+    },
+    "Japanese": {
+      "name": "Miura Katsuyuki",
+      "original": "三浦勝之"
+    },
+    "Korean": {
+      "name": "Kim Da-ol",
+      "original": "김다올"
+    },
+    "Id": 1204
+  },
+  {
+    "Name": "Phoebe",
+    "English": "Rebecca LaChance",
+    "Chinese": {
+      "name": "Fu Tingyun",
+      "original": "傅婷云"
+    },
+    "Japanese": {
+      "name": "Hondo Kaede",
+      "original": "本渡楓"
+    },
+    "Korean": {
+      "name": "Lee Bo-yong",
+      "original": "이보용"
+    },
+    "Id": 1506
+  },
+  {
+    "Name": "Phrolova",
+    "English": "Rae Lim",
+    "Chinese": {
+      "name": "Zhang Qi",
+      "original": "张琦"
+    },
+    "Japanese": {
+      "name": "Fujita Saki",
+      "original": "藤田咲"
+    },
+    "Korean": {
+      "name": "Choi Hari",
+      "original": "최하리"
+    },
+    "Id": 1608
+  },
+  {
+    "Name": "Qiuyuan",
+    "English": "Jeremy Ang Jones",
+    "Chinese": {
+      "name": "",
+      "original": ""
+    },
+    "Japanese": {
+      "name": "Miki Shinichirō",
+      "original": "三木眞一郎"
+    },
+    "Korean": {
+      "name": "",
+      "original": ""
+    },
+    "Id": 1411
+  },
+  {
+    "Name": "Roccia",
+    "English": "Holly Earl",
+    "Chinese": {
+      "name": "Shen Huasang",
+      "original": "沈话桑"
+    },
+    "Japanese": {
+      "name": "Kohara Konomi",
+      "original": "小原好美"
+    },
+    "Korean": {
+      "name": "Jang Mi",
+      "original": "장미"
+    },
+    "Id": 1606
+  },
+  {
+    "Name": "Female Rover",
+    "English": "Jane Jackson",
+    "Chinese": {
+      "name": "Guiniang",
+      "original": "龟娘"
+    },
+    "Japanese": {
+      "name": "Tanaka Minami",
+      "original": "田中美海"
+    },
+    "Korean": {
+      "name": "Song Harim",
+      "original": "송하림"
+    },
+    "Id": [1502, 1604, 1408]
+  },
+  {
+    "Name": "Male Rover",
+    "English": "Chase Brown",
+    "Chinese": {
+      "name": "Ma Yang",
+      "original": "马洋"
+    },
+    "Japanese": {
+      "name": "Masuda Toshiki",
+      "original": "増田俊樹"
+    },
+    "Korean": {
+      "name": "Kim Sinwoo",
+      "original": "김신우"
+    },
+    "Id": [1501, 1605, 1406]
+  },
+  {
+    "Name": "Sanhua",
+    "English": "Jennifer Armour",
+    "Chinese": {
+      "name": "Song Yuanyuan",
+      "original": "宋媛媛"
+    },
+    "Japanese": {
+      "name": "Matsuda Risae",
+      "original": "松田利冴"
+    },
+    "Korean": {
+      "name": "Yooyoung",
+      "original": "유영"
+    },
+    "Id": 1102
+  },
+  {
+    "Name": "Shorekeeper",
+    "English": "Stephanie McKeon",
+    "Chinese": {
+      "name": "Tang Yajing",
+      "original": "唐雅菁"
+    },
+    "Japanese": {
+      "name": "Suwa Ayaka",
+      "original": "諏訪彩花"
+    },
+    "Korean": {
+      "name": "Kim Bo-na",
+      "original": "김보나"
+    },
+    "Id": 1505
+  },
+  {
+    "Name": "Taoqi",
+    "English": "Clare Louise Connolly",
+    "Chinese": {
+      "name": "KIYO",
+      "original": null
+    },
+    "Japanese": {
+      "name": "Yōmiya Hina",
+      "original": "羊宮妃那"
+    },
+    "Korean": {
+      "name": "Yi Sae-ah",
+      "original": "이새아"
+    },
+    "Id": 1601
+  },
+  {
+    "Name": "Verina",
+    "English": "Heather Nicol",
+    "Chinese": {
+      "name": "Zhao Shuang",
+      "original": "赵爽"
+    },
+    "Japanese": {
+      "name": "Sasahara Yū",
+      "original": "篠原侑"
+    },
+    "Korean": {
+      "name": "Kang Saebom",
+      "original": "강새봄"
+    },
+    "Id": 1503
+  },
+  {
+    "Name": "Xiangli Yao",
+    "English": "Shaun Mendum",
+    "Chinese": {
+      "name": "Banma",
+      "original": "斑马"
+    },
+    "Japanese": {
+      "name": "Kobayashi Chiaki",
+      "original": "小林千晃"
+    },
+    "Korean": {
+      "name": "Jung Eui-jin",
+      "original": "정의진"
+    },
+    "Id": 1305
+  },
+  {
+    "Name": "Yangyang",
+    "English": "Rebecca Yeo",
+    "Chinese": {
+      "name": "Chongchong",
+      "original": "虫虫"
+    },
+    "Japanese": {
+      "name": "Ishikawa Yui",
+      "original": "石川由依"
+    },
+    "Korean": {
+      "name": "Lee Yu-ri",
+      "original": "이유리"
+    },
+    "Id": 1402
+  },
+  {
+    "Name": "Yinlin",
+    "English": "Naomi McDonald",
+    "Chinese": {
+      "name": "Xiao Liansha",
+      "original": "小连杀"
+    },
+    "Japanese": {
+      "name": "Koshimizu Ami",
+      "original": "小清水亜美"
+    },
+    "Korean": {
+      "name": "Kang Sae-bom",
+      "original": "강새봄"
+    },
+    "Id": 1302
+  },
+  {
+    "Name": "Youhu",
+    "English": "Leonora Haig",
+    "Chinese": {
+      "name": "Liu Yilei",
+      "original": "刘一蕾"
+    },
+    "Japanese": {
+      "name": "Tomita Miyu (",
+      "original": "富田美憂)"
+    },
+    "Korean": {
+      "name": "Park Si-yoon",
+      "original": "박시윤"
+    },
+    "Id": 1106
+  },
+  {
+    "Name": "Yuanwu",
+    "English": "Adam Diggle",
+    "Chinese": {
+      "name": "Liu Beichen",
+      "original": "刘北辰"
+    },
+    "Japanese": {
+      "name": "Shirokuma Hiroshi",
+      "original": "白熊寬嗣"
+    },
+    "Korean": {
+      "name": "Park Seong-tae",
+      "original": "박성태"
+    },
+    "Id": 1303
+  },
+  {
+    "Name": "Zani",
+    "English": "Alexandra Metaxa",
+    "Chinese": {
+      "name": "Nie Xiying",
+      "original": "聂曦映"
+    },
+    "Japanese": {
+      "name": "Ueda Hitomi",
+      "original": "上田瞳"
+    },
+    "Korean": {
+      "name": "Won Esther",
+      "original": "원에스더"
+    },
+    "Id": 1507
+  },
+  {
+    "Name": "Zhezhi",
+    "English": "Shin-Fei Chen",
+    "Chinese": {
+      "name": "Miao Zi",
+      "original": "苗子"
+    },
+    "Japanese": {
+      "name": "Makino Yui",
+      "original": "牧野由依"
+    },
+    "Korean": {
+      "name": "Kim Ha-ru",
+      "original": "김하루"
+    },
+    "Id": 1105
+  }
+]
