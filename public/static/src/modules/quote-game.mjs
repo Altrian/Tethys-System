@@ -23,7 +23,7 @@ const suggestionList = [
     { "Id": 1208, "Name": "Galbrena" }, { "Id": 1411, "Name": "Qiuyuan" }
 ];
 
-let winStreak = null;
+let winStreak = 0;
 let selectedQuote = null;
 let vaInfo = null;
 let audioPlayer = null;
@@ -98,6 +98,8 @@ const ElementHiderById = (() => {
 window.SharedTryController = SharedTryController;
 
 function finishGame(characterId, name, result) {
+    result ? winStreak++ : winStreak = 0;
+    document.querySelector('.game-streak').textContent = winStreak;
     const quoteGame = document.querySelector('.quote-game');
     function createResultElement(characterId, name, result, onNext = null) {
         const numberTries = 5 - remainingTries;
