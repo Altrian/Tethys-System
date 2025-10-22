@@ -2,8 +2,8 @@ import { formatDialogueText } from './text-formatter.mjs';
 import { createAudioPlayer } from './player.mjs';
 import { populateRadioGroup, initializeRadioGroup } from './input.mjs';
 
-import vaData from '/public/static/data/json/voices.json' with { type: 'json'};
-import manifest from '/public/static/data/json/manifest.json' with { type: 'json'};
+import vaData from '/static/data/json/voices.json' with { type: 'json'};
+import manifest from '/static/data/json/manifest.json' with { type: 'json'};
 
 const suggestionList = [
     { "Id": 1402, "Name": "Yangyang" }, { "Id": 1202, "Name": "Chixia" }, { "Id": 1503, "Name": "Verina" },
@@ -101,7 +101,7 @@ function finishGame(characterId, name, result) {
     const quoteGame = document.querySelector('.quote-game');
     function createResultElement(characterId, name, result, onNext = null) {
         const numberTries = 5 - remainingTries;
-        const imgSrc = `/public/static/data/imgs/iconCircle/${characterId}.webp`
+        const imgSrc = `/static/data/imgs/iconCircle/${characterId}.webp`
 
         const resultElement = document.createElement('div');
         resultElement.className = 'result';
@@ -209,7 +209,7 @@ function setupInputLogic() {
 
         const icon = document.createElement('img');
         icon.className = "avatar"
-        icon.src = `/public/static/data/imgs/iconCircle/${characterId}.webp`;
+        icon.src = `/static/data/imgs/iconCircle/${characterId}.webp`;
 
         iconContainer.appendChild(icon);
 
@@ -241,7 +241,7 @@ function setupInputLogic() {
 
         const img = document.createElement('img');
         img.className = 'avatar';
-        img.src = `/public/static/data/imgs/iconCircle/${id}.webp`;
+        img.src = `/static/data/imgs/iconCircle/${id}.webp`;
 
         avatarBorder.appendChild(img);
 
@@ -430,7 +430,7 @@ function setupQuoteHint(container) {
                     btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select')].name}`;
                 }
                 if (audioPlayer) {
-                    audioPlayer.setSource(`/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'english']}.mp3`);
+                    audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'english']}.mp3`);
                 }
                 if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
             });
@@ -447,7 +447,7 @@ function setupQuoteHint(container) {
                 const audioPlayerElement = document.createElement('div');
                 audioPlayerElement.className = 'audio-player simple';
                 audioPlayer = createAudioPlayer(audioPlayerElement, {
-                    src: `/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'English']}.mp3`,
+                    src: `/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'English']}.mp3`,
                     playerId: 'player',
                     showProgress: false,
                     showTime: false,
@@ -487,7 +487,7 @@ async function setupQuoteGame() {
     const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)]
     const characterId = randomQuote.character_id
     const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
-    const jsonFile = await fetch(`/public/static/data/json/characters/${characterId}.json`).then(res => res.json());
+    const jsonFile = await fetch(`/static/data/json/characters/${characterId}.json`).then(res => res.json());
     selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
     document.querySelector('.quote').replaceChildren(formatDialogueText(selectedQuote.Content));
 }
@@ -548,7 +548,7 @@ export function InitializeQuoteGame() {
             quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value].name : 'Unknown'}`;
         }
         if (audioPlayer) {
-            audioPlayer.setSource(`/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[value]}.mp3`);
+            audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[value]}.mp3`);
         }
     });
     setupQuoteGame();
