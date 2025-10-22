@@ -570,7 +570,7 @@ small {
   gap: 1rem;
 
   @media (min-width: 40rem) {
-    grid-template-columns: 1fr minmax(0, 60rem) 1fr;
+    grid-template-columns: 1fr minmax(0, 40rem) 1fr;
     grid-template-areas: 
       "left info right"
       "left answers right"
@@ -594,6 +594,10 @@ small {
   text-align: center;
 }
 
+.game-info .game-stats {
+  display: flex;
+}
+
 .game-info .game-subtitle {
   font-size: 1rem;
   font-weight: 500;
@@ -611,33 +615,136 @@ small {
   justify-content: center;
   display: grid;
   gap: .5rem;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "quote-text quote-text"
-    "va-name audio-player";
+    "quote-text"
+    "va-name"
+    "audio-player";
+
+  @media (min-width: 40rem) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "quote-text quote-text"
+      "va-name audio-player";
+  }
 }
 
 .quote-game[data-hint-lang="true"] {
   grid-template-areas:
-    "quote-text quote-text"
-    "va-name audio-player"
-    "lang-radio lang-radio";
+    "quote-text"
+    "lang-radio"
+    "va-name"
+    "audio-player";
+
+  @media (min-width: 40rem) {
+    grid-template-areas:
+      "quote-text quote-text"
+      "lang-radio lang-radio"
+      "va-name audio-player";
+  }
+}
+
+.quote-game:has(>.result) {
+  grid-template-areas:
+    "quote-text"
+    "result"
+    "lang-radio"
+    "va-name"
+    "audio-player";
+
+  @media (min-width: 40rem) {
+    grid-template-areas:
+      "quote-text quote-text"
+      "result result"
+      "lang-radio lang-radio"
+      "va-name audio-player";
+  }
 }
 
 .quote-game .quote {
   grid-area: quote-text;
   width: 100%;
+  min-height: 2rem;
   text-align: center;
   font-style: italic;
 }
 
-.quote-game .hint-one, .quote-game .hint-two {
+.quote-game .result {
+  grid-area: result;
+  justify-self: center;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  padding: 1rem;
+  row-gap: .5rem;
+  width: fit-content;
 }
 
-.quote-game .btn {
-  min-width: 14rem;
+.result > .result-title {
+  display: inline;
+  font-size: 1.3rem;
+}
+
+.result > .result-answer {
+  display: flex;
+  flex-basis: 100%;
+  flex-direction: row;
+  justify-content: center;
+  column-gap: .8rem;
+}
+
+.result .avatar-border {
+  position: relative;
+  width: 80px;              
+  height: 80px;
+}
+
+.result .avatar-border::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px solid #3498db; 
+  border-radius: 50%;
+  z-index: 0; 
+}
+
+.result .avatar {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+}
+
+.result .result-answer-info {
+  display: flex;
+  flex-direction: column;
+  row-gap: .3rem;
+}
+
+.result .answer-name {
+  font-size: 1.2rem;
+}
+
+.result .nb-tries {
+  font-size: .9rem;
+}
+
+.result .nb-tries .nth{
+  font-size: 1rem;
+}
+
+.result .answer-stats {
+  font-size: .8rem;
+  text-decoration: underline;
+}
+
+.result .btn {
+  justify-self: center;
+  width: 100%;
+}
+
+.result .btn::before {
+  background-color: rgb(var(--theme-accent-10));
 }
 
 .quote-game .lang-radio {
@@ -654,6 +761,11 @@ small {
 
 .lang-radio>.btn-radio {
   flex-grow: 1;
+}
+
+.quote-game .hint-one, .quote-game .hint-two {
+  display: flex;
+  justify-content: center;
 }
 
 .quote-game .hint-one {
@@ -698,9 +810,11 @@ small {
 .game-answers {
   grid-area: answers;
   width: 80%;
+  justify-self: center;
+  max-width: 22.5rem;
   @media (min-width: 40rem) {
-    max-width: 22.5rem;
-    justify-self: center;
+    
+    
   }
 }
 
@@ -716,11 +830,16 @@ small {
   row-gap: 1rem;
 }
 
-.answers-container .guess {
-  background-color: rgb(var(--theme-accent));
+[data-result='false'] {
+  --result-color: rgb(var(--theme-status-red));
+}
+
+[data-result='true'] {
+  --result-color: rgb(var(--theme-status-green));
 }
 
 .guess {
+  position: relative;
   display: flex;
   justify-content: flex-start;
   flex-direction: row;
@@ -729,6 +848,18 @@ small {
   font-weight: 1000;
   align-items: center;
   border-radius: 8px;
+  overflow: hidden;
+}
+
+.guess::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--result-color);
+}
+
+.guess span {
+  position: relative;
 }
 
 .guess .avatar-border {
@@ -1037,6 +1168,18 @@ small {
   50%, 100% { transform: translateX(0); }
 }
 
+@keyframes tada {
+  0% { transform: scaleX(1); }
+  10%,20% { transform: scale(0.9) rotate(-3deg); }
+  30%,50%,70%,90% { transform: scale(1.1) rotate(3deg); }
+  40%,60%,80% { transform: scale(1.1) rotate(-3deg); }
+  100% { transform: scaleX(1); }
+}
+
 .headShake {
   animation: headShake 0.8s ease-in-out;
+}
+
+.tada {
+  animation: tada 1s;
 }

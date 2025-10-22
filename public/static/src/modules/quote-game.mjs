@@ -22,232 +22,329 @@ const suggestionList = [
     { "Id": 1208, "Name": "Galbrena" }, { "Id": 1411, "Name": "Qiuyuan" }
 ];
 
+let winStreak = null;
 let selectedQuote = null;
 let vaInfo = null;
 let audioPlayer = null;
+let remainingTries = null;
 
 // Global controller shared by all buttons
 const SharedTryController = (() => {
-	const buttons = new Set();
+    const buttons = new Set();
 
-	function register(state) {
-		buttons.add(state);
-		state.updateText();
-	}
+    function register(state) {
+        buttons.add(state);
+        state.updateText();
+    }
 
-	function decrementAll() {
-		buttons.forEach(state => {
-			if (state.remaining > 0) {
-				state.remaining--;
-				state.updateText();
-				if (state.remaining === 0) {
+    function decrementAll() {
+        buttons.forEach(state => {
+            if (state.remaining > 0) {
+                state.remaining--;
+                state.updateText();
+                if (state.remaining === 0) {
                     console.log(state.button)
-					state.button.disabled = false;
-					if (typeof state.onReady === 'function') {
-						state.onReady(state.button);
-					}
-				}
-			}
-		});
-	}
+                    state.button.disabled = false;
+                    if (typeof state.onReady === 'function') {
+                        state.onReady(state.button);
+                    }
+                }
+            }
+        });
+    }
 
-	return { register, decrementAll };
+    return { register, decrementAll };
 })();
 window.SharedTryController = SharedTryController;
 
+function finishGame(characterId, name, result) {
+    const quoteGame = document.querySelector('.quote-game');
+    function createResultElement(characterId, name, result, onNext = null) {
+        const numberTries = 5 - remainingTries;
+        const imgSrc = `/public/static/data/imgs/iconCircle/${characterId}.webp`
+
+        const resultElement = document.createElement('div');
+        resultElement.className = 'result';
+
+        // --- Titles ---
+        const title1 = document.createElement('div');
+        title1.className = 'result-title';
+        title1.textContent = result ? 'Well Done!' : 'Game Over!';
+
+        const title2 = document.createElement('div');
+        title2.className = 'result-title';
+        title2.textContent = 'The Character Was:';
+
+        // --- Answer container ---
+        const answer = document.createElement('div');
+        answer.className = 'result-answer';
+
+        const avatarBorder = document.createElement('div');
+        avatarBorder.className = 'avatar-border';
+
+        const avatar = document.createElement('img');
+        avatar.className = 'avatar';
+        avatar.src = imgSrc;
+        avatarBorder.appendChild(avatar);
+
+        const info = document.createElement('div');
+        info.className = 'result-answer-info';
+
+        const answerName = document.createElement('div');
+        answerName.className = 'answer-name';
+        answerName.textContent = name;
+
+        const nbTries = document.createElement('div');
+        nbTries.className = 'nb-tries';
+        nbTries.textContent = 'Number of tries: ';
+
+        const nth = document.createElement('span');
+        nth.className = 'nth';
+        nth.textContent = numberTries;
+        nbTries.appendChild(nth);
+
+        const answerStats = document.createElement('div');
+        answerStats.className = 'answer-stats';
+        answerStats.textContent = 'stats';
+
+        info.append(answerName, nbTries, answerStats);
+        answer.append(avatarBorder, info);
+
+        // --- Next button ---
+        const resultNext = document.createElement('div');
+        resultNext.className = 'result-next';
+
+        const button = document.createElement('button');
+        button.className = 'btn btn-text medium';
+        if (onNext) button.addEventListener('click', onNext);
+
+        const spanText = document.createElement('span');
+        spanText.className = 'btn-text';
+        spanText.textContent = 'Next Round';
+
+        button.appendChild(spanText);
+        resultNext.appendChild(button);
+
+        // --- Assemble everything ---
+        resultElement.append(title1, title2, answer, resultNext);
+        return resultElement;
+    }
+    requestAnimationFrame(() => {
+        quoteGame.appendChild(createResultElement(characterId, name, result))
+    })
+    const guessBox = document.querySelector('.guessbox');
+    guessBox.remove();
+}
 
 function setupInputLogic() {
-	const inputForm = document.getElementById('guess-input-form');
-	const input = inputForm.querySelector('#guess-input');
-	const pop = inputForm.querySelector("#guess-input-popover")
-	const list = inputForm.querySelector("#suggestions-list");
+    const inputForm = document.getElementById('guess-input-form');
+    const input = inputForm.querySelector('#guess-input');
+    const pop = inputForm.querySelector("#guess-input-popover")
+    const list = inputForm.querySelector("#suggestions-list");
 
-	let used = new Set()
-	let current = [];
-	let index = -1;
-	let pointerDown = false; // 👈 track pointer interaction
-	let activeEl = null; // keep reference to currently highlighted element
+    let used = new Set()
+    let current = [];
+    let index = -1;
+    let pointerDown = false; // 👈 track pointer interaction
+    let activeEl = null; // keep reference to currently highlighted element
 
-	// --- Helpers ---
-    function insertGuess(selector, guess = {}) {
+    // --- Helpers ---
+    function insertGuess(selector, guess = {}, correctGuess = false) {
         const { characterId, characterName } = guess;
-    
+
         const container = document.querySelector(selector);
         if (!container) return
-    
+
         const li = document.createElement('li');
-        li.className = "guess"
-        li.classList.add('headShake');
-    
+        li.className = "guess";
+        li.dataset.result = correctGuess;
+
+        const correctClasses = ['tada']
+        const incorrectClasses = ['headShake']
+        li.classList.add(...(correctGuess ? correctClasses : incorrectClasses))
+
         const iconContainer = document.createElement('div');
         iconContainer.className = "avatar-border"
-    
+
         const icon = document.createElement('img');
         icon.className = "avatar"
         icon.src = `/public/static/data/imgs/iconCircle/${characterId}.webp`;
-    
+
         iconContainer.appendChild(icon);
-    
+
         const span = document.createElement('span');
+        span.className = 'btn-text'
         span.textContent = characterName;
-    
+
         li.appendChild(iconContainer);
         li.appendChild(span);
         container.appendChild(li)
-    
+
         // Define the handler separately so we can remove it later
         const handleAnimationEnd = () => {
-            li.classList.remove('headShake');
+            li.classList.remove(correctGuess ? 'tada' : 'headShake');
             li.removeEventListener('animationend', handleAnimationEnd);
         };
-    
+
         li.addEventListener('animationend', handleAnimationEnd);
-    
+
     }
 
-	function createGuessElement({ id, name }) {
-		const li = document.createElement('li');
-		li.className = 'guess';
-		li.dataset.id = id;
+    function createGuessElement({ id, name }) {
+        const li = document.createElement('li');
+        li.className = 'guess';
+        li.dataset.id = id;
 
-		const avatarBorder = document.createElement('div');
-		avatarBorder.className = 'avatar-border small';
+        const avatarBorder = document.createElement('div');
+        avatarBorder.className = 'avatar-border small';
 
-		const img = document.createElement('img');
-		img.className = 'avatar';
-		img.src = `/public/static/data/imgs/iconCircle/${id}.webp`;
+        const img = document.createElement('img');
+        img.className = 'avatar';
+        img.src = `/public/static/data/imgs/iconCircle/${id}.webp`;
 
-		avatarBorder.appendChild(img);
+        avatarBorder.appendChild(img);
 
-		const span = document.createElement('span');
-		span.textContent = name;
+        const span = document.createElement('span');
+        span.className = 'btn-text';
+        span.textContent = name;
 
-		li.appendChild(avatarBorder);
-		li.appendChild(span);
+        li.appendChild(avatarBorder);
+        li.appendChild(span);
 
-		return li;
-	}
+        return li;
+    }
 
-	function updateSuggestions() {
-		const val = input.value.trim().toLowerCase();
-		if (!val) {
-			pop.hidePopover();
-			return;
-		}
-		const starts = suggestionList.filter(d => !used.has(d.Id) && d.Name.toLowerCase().startsWith(val));
-		const contains = suggestionList.filter(
-			d => !used.has(d.Id) && !d.Name.toLowerCase().startsWith(val) && d.Name.toLowerCase().includes(val)
-		);
+    function updateSuggestions() {
+        const val = input.value.trim().toLowerCase();
+        if (!val) {
+            pop.hidePopover();
+            return;
+        }
+        const starts = suggestionList.filter(d => !used.has(d.Id) && d.Name.toLowerCase().startsWith(val));
+        const contains = suggestionList.filter(
+            d => !used.has(d.Id) && !d.Name.toLowerCase().startsWith(val) && d.Name.toLowerCase().includes(val)
+        );
 
-		current = [...starts, ...contains];
+        current = [...starts, ...contains];
 
-		const listEle = current.map(d => createGuessElement({ id: d.Id, name: d.Name }))
-		list.replaceChildren(...listEle)
-		index = -1;
-		activeEl = null;
+        const listEle = current.map(d => createGuessElement({ id: d.Id, name: d.Name }))
+        list.replaceChildren(...listEle)
+        index = -1;
+        activeEl = null;
 
-		if (current.length) pop.showPopover();
-		else pop.hidePopover();
-	}
+        if (current.length) pop.showPopover();
+        else pop.hidePopover();
+    }
 
-	function highlight(items) {
-		const newEl = items[index];
+    function highlight(items) {
+        const newEl = items[index];
 
-		// no change → do nothing
-		if (activeEl === newEl) return;
+        // no change → do nothing
+        if (activeEl === newEl) return;
 
-		// remove active from previous
-		if (activeEl) activeEl.classList.remove("active");
+        // remove active from previous
+        if (activeEl) activeEl.classList.remove("active");
 
-		// add active to new one
-		if (newEl) {
-			newEl.classList.add("active");
-			newEl.scrollIntoView({ block: "nearest" });
-		}
+        // add active to new one
+        if (newEl) {
+            newEl.classList.add("active");
+            newEl.scrollIntoView({ block: "nearest" });
+        }
 
-		activeEl = newEl;
-	}
+        activeEl = newEl;
+    }
 
-	function useSuggestion(id, name) {
-		input.value = name;
-        if (id === selectedQuote.RoleId) console.log("victory")
-		console.log(`Character: ${name} selected`)
-		insertGuess('.answers-container', { characterId: id, characterName: name })
-		used.add(id);
-		SharedTryController.decrementAll();
-		input.value = '';
-		pop.hidePopover();
-	}
+    function useSuggestion(id, name) {
+        input.value = name;
+        input.value = '';
+        pop.hidePopover();
+        console.log(`Character: ${name} selected`);
+        if (id === selectedQuote.RoleId) {
+            console.log("victory");
+            insertGuess('.answers-container', { characterId: id, characterName: name }, true);
+            finishGame(id, name, true);
+            return
+        };
+        if (remainingTries < 0) {
+            insertGuess('.answers-container', { characterId: id, characterName: name });
+            finishGame(id, name, false);
+            return
+        };
+        insertGuess('.answers-container', { characterId: id, characterName: name });
+        used.add(id);
+        SharedTryController.decrementAll();
+        remainingTries--;
+    }
 
-	// --- Event handling ---
+    // --- Event handling ---
 
-	// Cancel submit event
-	inputForm.addEventListener("submit", (e) => e.preventDefault());
+    // Cancel submit event
+    inputForm.addEventListener("submit", (e) => e.preventDefault());
 
-	// While typing
-	input.addEventListener("input", updateSuggestions);
+    // While typing
+    input.addEventListener("input", updateSuggestions);
 
-	// --- Handle focus source ---
-	input.addEventListener("pointerdown", () => (pointerDown = true));
-	input.addEventListener("pointerup", () => {
-		pointerDown = false;
-		if (input.value.trim()) updateSuggestions();
-	});
+    // --- Handle focus source ---
+    input.addEventListener("pointerdown", () => (pointerDown = true));
+    input.addEventListener("pointerup", () => {
+        pointerDown = false;
+        if (input.value.trim()) updateSuggestions();
+    });
 
-	// When focusing with keyboard (e.g., Tab)
-	input.addEventListener("focus", () => {
-		if (pointerDown) return; // skip if focus came from pointer
-		if (input.value.trim()) updateSuggestions();
-	});
+    // When focusing with keyboard (e.g., Tab)
+    input.addEventListener("focus", () => {
+        if (pointerDown) return; // skip if focus came from pointer
+        if (input.value.trim()) updateSuggestions();
+    });
 
-	input.addEventListener("keydown", e => {
-		if (!pop.matches(":popover-open")) return;
-		const items = list.querySelectorAll("li");
-		if (!items.length) return;
+    input.addEventListener("keydown", e => {
+        if (!pop.matches(":popover-open")) return;
+        const items = list.querySelectorAll("li");
+        if (!items.length) return;
 
-		if (e.key === "ArrowDown") {
-			e.preventDefault();
-			index = (index + 1) % items.length;
-			highlight(items);
-		} else if (e.key === "ArrowUp") {
-			e.preventDefault();
-			index = (index - 1 + items.length) % items.length;
-			highlight(items);
-		} else if (e.key === "Enter" && index === -1) {
-			const item = items[0];
-			useSuggestion(Number(item.dataset.id), item.textContent);
-		} else if (e.key === "Enter" && index >= 0) {
-			const item = items[index];
-			useSuggestion(Number(item.dataset.id), item.textContent);
-		}
-	});
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            index = (index + 1) % items.length;
+            highlight(items);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            index = (index - 1 + items.length) % items.length;
+            highlight(items);
+        } else if (e.key === "Enter" && index === -1) {
+            const item = items[0];
+            useSuggestion(Number(item.dataset.id), item.textContent);
+        } else if (e.key === "Enter" && index >= 0) {
+            const item = items[index];
+            useSuggestion(Number(item.dataset.id), item.textContent);
+        }
+    });
 
-	list.addEventListener("click", e => {
-		const li = e.target.closest('.guess');
-		if (!li) return;
-		useSuggestion(Number(li.dataset.id), li.textContent);
-	});
+    list.addEventListener("click", e => {
+        const li = e.target.closest('.guess');
+        if (!li) return;
+        useSuggestion(Number(li.dataset.id), li.textContent);
+    });
 
 }
 
-function setupQuoteHint() {
-	const langISO = {
-		'English': 'en',
-		'Japanese': 'ja',
-		'Korean': 'ko',
-		'Chinese': 'zh'
-	};
-    const quoteGame = document.querySelector('.quote-game');
-    const hintOneContainer = quoteGame.querySelector('.hint-one');
-    const hintTwoContainer = quoteGame.querySelector('.hint-two');
-
+function setupQuoteHint(container) {
+    const langISO = {
+        'English': 'en',
+        'Japanese': 'ja',
+        'Korean': 'ko',
+        'Chinese': 'zh'
+    };
+    
 
     // --- Helpers ---
-    function setupTryButton({ btnElement, initialTries, textFormatter = null, onReady = null }) {
-        const button = btnElement;
-        if (!button) return;
-        const textSpan = button.querySelector('.btn-text.va-label');
+    function setupTryButton(btnClass, { initialTries, textFormatter = null, onReady = null }) {
+        const button = document.createElement('button');
+        button.className = btnClass;
         button.disabled = true;
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'btn-text va-label'
+
         const state = {
             button,
             textSpan,
@@ -262,6 +359,8 @@ function setupQuoteHint() {
             }
         };
         SharedTryController.register(state);
+        button.append(textSpan);
+        return button
     }
 
     function findVaInformation(items, characterId) {
@@ -274,9 +373,7 @@ function setupQuoteHint() {
         });
     }
 
-    const hintBtn1 = hintOneContainer.querySelector('button');
-    setupTryButton({
-        btnElement: hintBtn1,
+    const hintOne = setupTryButton('btn extra-large btn-text va-name-btn', {
         initialTries: 3,
         textFormatter: (remaining) => `Va Name in ${remaining} ${remaining === 1 ? 'try' : 'tries'}`,
         onReady: (btn) => {
@@ -285,7 +382,7 @@ function setupQuoteHint() {
                 if (btn.querySelector('.va-label').textContent != 'Click to reveal') return
                 if (!vaInfo) vaInfo = findVaInformation(vaData, selectedQuote.RoleId)
                 console.log(vaInfo)
-                console.log("Toggling hint language");
+                console.log("Toggling hint language", container);
                 if (!localStorage.getItem('va-lang-select') || localStorage.getItem('va-lang-select') === 'English') {
                     btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select') || 'English']}`;
                 } else {
@@ -294,113 +391,122 @@ function setupQuoteHint() {
                 if (audioPlayer) {
                     audioPlayer.setSource(`/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'english']}.mp3`);
                 }
-                if (quoteGame.dataset.hintLang != 'true') quoteGame.dataset.hintLang = 'true';
+                if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
             });
         }
     })
-    const hintBtn2 = hintTwoContainer.querySelector('button');
-    setupTryButton({
-        btnElement: hintBtn2,
-        initialTries: 5,
+    
+    const hintTwo = setupTryButton('btn extra-large btn-text va-name-btn', {
+        initialTries: 4,
         textFormatter: (remaining) => `Quote audio in ${remaining} ${remaining === 1 ? 'try' : 'tries'}`,
         onReady: (btn) => {
             btn.querySelector('.va-label').textContent = 'Click to reveal';
             btn.addEventListener('click', async () => {
-                if (quoteGame.dataset.hintLang != 'true') quoteGame.dataset.hintLang = 'true';
+                if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
                 const audioPlayerElement = document.createElement('div');
-	            audioPlayerElement.className = 'audio-player simple';
+                audioPlayerElement.className = 'audio-player simple';
                 audioPlayer = createAudioPlayer(audioPlayerElement, {
                     src: `/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'English']}.mp3`,
                     playerId: 'player',
                     showProgress: false,
                     showTime: false,
                 });
-                hintBtn2.replaceWith(audioPlayerElement);
+                btn.replaceWith(audioPlayerElement);
             });
         }
     })
-
-
-
+    
+    return [hintOne, hintTwo];
 }
 
 function resetQuoteGame() {
     const quoteGame = document.querySelector('.quote-game');
     const hintOneContainer = quoteGame.querySelector('.hint-one');
-    const hintTwoContainer = quoteGame.querySelector('.hint-two');   
-    
+    const hintTwoContainer = quoteGame.querySelector('.hint-two');
+    const resultContainer = quoteGame.querySelector('.result');
+    resultContainer.remove()
+
     const answersList = document.querySelector('.answers-container')
-
-    // --- Helpers ---
-    function resetButtonElement(btnClass) {
-        const btn = document.createElement('button');
-        btn.className = 'btn extra-large btn-text va-name-btn';
-        btn.classList.add(btnClass);
-
-        const span = document.createElement('span');
-        span.className = 'btn-text va-label';
-
-        btn.appendChild(span);
-        return btn;
-    }
 
     quoteGame.dataset.hintLang = 'false'
     answersList.replaceChildren()
     if (audioPlayer) audioPlayer.destroy();
     vaInfo = null;
-    hintOneContainer.replaceChildren(resetButtonElement('example'));
-    hintTwoContainer.replaceChildren(resetButtonElement('example'));
+    remainingTries = null;
+    const [btnOneEl, btnTwoEl] = setupQuoteHint(quoteGame);
+    hintOneContainer.replaceChildren(btnOneEl);
+    hintTwoContainer.replaceChildren(btnTwoEl);
     setupQuoteGame();
 }
 
 async function setupQuoteGame() {
-    function populateQuote(containerSelector, selectedQuote) {
-        const container = document.querySelector(containerSelector);
-        if (!container) return;
+    remainingTries = 5;
 
-        // Clear previous content
-        const quoteEl = document.createElement('span');
-        quoteEl.className = 'quote';
-        quoteEl.textContent = `"${selectedQuote.Content}"`;
-        container.replaceWith(quoteEl);
-    }
-	const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)]
-	const characterId = randomQuote.character_id
-	const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
+    const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)]
+    const characterId = randomQuote.character_id
+    const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
     const jsonFile = await fetch(`/public/static/data/json/characters/${characterId}.json`).then(res => res.json());
     selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
-    await populateQuote('.quote-game .quote', selectedQuote);
-    setupQuoteHint();
+    document.querySelector('.quote').textContent = selectedQuote.Content;
 }
 
 export function InitializeQuoteGame() {
-	const langISO = {
-		'English': 'en',
-		'Japanese': 'ja',
-		'Korean': 'ko',
-		'Chinese': 'zh'
-	};
-	const langs = {
-		'english': 'English',
-		'japanese': 'Japanese',
-		'chinese': 'Chinese',
-		'korean': 'Korean'
-	};
+    function populateQuoteGame(containerSelector) {
+        const container = document.querySelector(containerSelector);
+        container.classList.add('quote-game');
+
+        const quoteEl = document.createElement('div');
+        quoteEl.className = 'quote';
+        quoteEl.textContent =  "";
+
+        const radioEl = document.createElement('div');
+        radioEl.className = 'toggle-group lang-radio';
+        radioEl.setAttribute('role', 'radiogroup');
+        radioEl.setAttribute('aria-labelledby', 'va-lang-select');
+
+        const hintOneEl = document.createElement('div');
+        hintOneEl.className = 'hint-one';
+        
+        const hintTwoEl = document.createElement('div');
+        hintTwoEl.className = 'hint-two';
+        
+        const [btnOneEl, btnTwoEl] = setupQuoteHint(container);
+        hintOneEl.append(btnOneEl);
+        hintTwoEl.append(btnTwoEl);
+
+        container.replaceChildren(quoteEl, radioEl, hintOneEl, hintTwoEl)
+    }
+
+    const langISO = {
+        'English': 'en',
+        'Japanese': 'ja',
+        'Korean': 'ko',
+        'Chinese': 'zh'
+    };
+    const langs = {
+        'english': 'English',
+        'japanese': 'Japanese',
+        'chinese': 'Chinese',
+        'korean': 'Korean'
+    };
+    populateQuoteGame('.game-content')
     setupInputLogic();
     populateRadioGroup('.lang-radio', langs, 'va-lang');
     initializeRadioGroup('va-lang-select', 'English', (value) => {
         const quoteGame = document.querySelector('.quote-game');
-        const vaLabel = quoteGame.querySelector('.va-label');
-        if (vaLabel.textContent != 'Click to reveal') {
-            if (value === 'English') {
-                quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
-            } else {
-                quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value].name : 'Unknown'}`;
-            }
+        const btnEl = quoteGame.querySelector('.hint-one > .btn')
+        const vaLabel = quoteGame.querySelector('.hint-one .va-label');
+        if (btnEl.disabled) return
+        if (vaLabel.textContent === 'Click to reveal') return
+        if (value === 'English') {
+            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
+        } else {
+            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value].name : 'Unknown'}`;
         }
         if (audioPlayer) {
             audioPlayer.setSource(`/public/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[value]}.mp3`);
         }
+
     });
     setupQuoteGame();
     window.resetQuoteGame = resetQuoteGame;
