@@ -2,25 +2,53 @@ import { formatDialogueText } from './text-formatter.mjs';
 import { createAudioPlayer } from './player.mjs';
 import { populateRadioGroup, initializeRadioGroup } from './input.mjs';
 
-import vaData from '/static/data/json/voices.json' with { type: 'json'};
 import manifest from '/static/data/json/manifest.json' with { type: 'json'};
 
 const suggestionList = [
-    { "Id": 1402, "Name": "Yangyang" }, { "Id": 1202, "Name": "Chixia" }, { "Id": 1503, "Name": "Verina" },
-    { "Id": 1501, "Name": "Rover: Spectro" }, { "Id": 1102, "Name": "Sanhua" }, { "Id": 1601, "Name": "Taoqi" },
-    { "Id": 1502, "Name": "Rover: Spectro" }, { "Id": 1103, "Name": "Baizhi" }, { "Id": 1203, "Name": "Encore" },
-    { "Id": 1602, "Name": "Danjin" }, { "Id": 1403, "Name": "Aalto" }, { "Id": 1404, "Name": "Jiyan" },
-    { "Id": 1204, "Name": "Mortefi" }, { "Id": 1603, "Name": "Camellya" }, { "Id": 1301, "Name": "Calcharo" },
-    { "Id": 1302, "Name": "Yinlin" }, { "Id": 1104, "Name": "Lingyang" }, { "Id": 1303, "Name": "Yuanwu" },
-    { "Id": 1604, "Name": "Rover: Havoc" }, { "Id": 1605, "Name": "Rover: Havoc" }, { "Id": 1405, "Name": "Jianxin" },
-    { "Id": 1304, "Name": "Jinhsi" }, { "Id": 1305, "Name": "Xiangli Yao" }, { "Id": 1205, "Name": "Changli" },
-    { "Id": 1105, "Name": "Zhezhi" }, { "Id": 1504, "Name": "Lumi" }, { "Id": 1106, "Name": "Youhu" },
-    { "Id": 1505, "Name": "Shorekeeper" }, { "Id": 1606, "Name": "Roccia" }, { "Id": 1107, "Name": "Carlotta" },
-    { "Id": 1206, "Name": "Brant" }, { "Id": 1506, "Name": "Phoebe" }, { "Id": 1406, "Name": "Rover: Aero" },
-    { "Id": 1607, "Name": "Cantarella" }, { "Id": 1407, "Name": "Ciaccona" }, { "Id": 1507, "Name": "Zani" },
-    { "Id": 1408, "Name": "Rover: Aero" }, { "Id": 1207, "Name": "Lupa" }, { "Id": 1608, "Name": "Phrolova" },
-    { "Id": 1409, "Name": "Cartethyia" }, { "Id": 1306, "Name": "Augusta" }, { "Id": 1410, "Name": "Iuno" },
-    { "Id": 1208, "Name": "Galbrena" }, { "Id": 1411, "Name": "Qiuyuan" }
+    { "Id": 1402, "Name": "Yangyang", "patch": 10 }, 
+    { "Id": 1202, "Name": "Chixia", "patch": 10 }, 
+    { "Id": 1503, "Name": "Verina", "patch": 10 },
+    { "Id": 1501, "Name": "Rover: Spectro", "patch": 10 }, 
+    { "Id": 1102, "Name": "Sanhua", "patch": 10 }, 
+    { "Id": 1601, "Name": "Taoqi", "patch": 10 },
+    { "Id": 1502, "Name": "Rover: Spectro", "patch": 10 }, 
+    { "Id": 1103, "Name": "Baizhi", "patch": 10 }, 
+    { "Id": 1203, "Name": "Encore", "patch": 10 },
+    { "Id": 1602, "Name": "Danjin", "patch": 10 }, 
+    { "Id": 1403, "Name": "Aalto", "patch": 10 }, 
+    { "Id": 1404, "Name": "Jiyan", "patch": 10 },
+    { "Id": 1204, "Name": "Mortefi", "patch": 10 }, 
+    { "Id": 1603, "Name": "Camellya", "patch": 14 }, 
+    { "Id": 1301, "Name": "Calcharo", "patch": 10 },
+    { "Id": 1302, "Name": "Yinlin", "patch": 10 }, 
+    { "Id": 1104, "Name": "Lingyang", "patch": 10 }, 
+    { "Id": 1303, "Name": "Yuanwu", "patch": 10 },
+    { "Id": 1604, "Name": "Rover: Havoc", "patch": 10 }, 
+    { "Id": 1605, "Name": "Rover: Havoc", "patch": 10 }, 
+    { "Id": 1405, "Name": "Jianxin", "patch": 10 },
+    { "Id": 1304, "Name": "Jinhsi", "patch": 11 }, 
+    { "Id": 1305, "Name": "Xiangli Yao", "patch": 12 }, 
+    { "Id": 1205, "Name": "Changli", "patch": 11 },
+    { "Id": 1105, "Name": "Zhezhi", "patch": 12 }, 
+    { "Id": 1504, "Name": "Lumi", "patch": 14 }, 
+    { "Id": 1106, "Name": "Youhu", "patch": 13 },
+    { "Id": 1505, "Name": "Shorekeeper", "patch": 13 }, 
+    { "Id": 1606, "Name": "Roccia", "patch": 20 }, 
+    { "Id": 1107, "Name": "Carlotta", "patch": 20 },
+    { "Id": 1206, "Name": "Brant", "patch": 21 }, 
+    { "Id": 1506, "Name": "Phoebe", "patch": 21 }, 
+    { "Id": 1406, "Name": "Rover: Aero", "patch": 22 },
+    { "Id": 1607, "Name": "Cantarella", "patch": 22 }, 
+    { "Id": 1407, "Name": "Ciaccona", "patch": 23 }, 
+    { "Id": 1507, "Name": "Zani", "patch": 23 },
+    { "Id": 1408, "Name": "Rover: Aero", "patch": 22 }, 
+    { "Id": 1207, "Name": "Lupa", "patch": 24 }, 
+    { "Id": 1608, "Name": "Phrolova", "patch": 25 },
+    { "Id": 1409, "Name": "Cartethyia", "patch": 24 }, 
+    { "Id": 1306, "Name": "Augusta", "patch": 26 }, 
+    { "Id": 1410, "Name": "Iuno", "patch": 26 },
+    { "Id": 1208, "Name": "Galbrena", "patch": 27 }, 
+    { "Id": 1411, "Name": "Qiuyuan", "patch": 27 }
 ];
 
 
@@ -199,7 +227,7 @@ function setupInputLogic() {
     const pop = inputForm.querySelector("#guess-input-popover")
     const list = inputForm.querySelector("#suggestions-list");
 
-    let used = new Set()
+    roundData.used = new Set()
     let current = [];
     let index = -1;
     let pointerDown = false; // 👈 track pointer interaction
@@ -272,14 +300,15 @@ function setupInputLogic() {
     }
 
     function updateSuggestions() {
+        console.log('roundData.used is:', roundData.used);
         const val = input.value.trim().toLowerCase();
         if (!val) {
             pop.hidePopover();
             return;
         }
-        const starts = suggestionList.filter(d => !used.has(d.Id) && d.Name.toLowerCase().startsWith(val));
+        const starts = suggestionList.filter(d => !roundData.used.has(d.Id) && d.Name.toLowerCase().startsWith(val));
         const contains = suggestionList.filter(
-            d => !used.has(d.Id) && !d.Name.toLowerCase().startsWith(val) && d.Name.toLowerCase().includes(val)
+            d => !roundData.used.has(d.Id) && !d.Name.toLowerCase().startsWith(val) && d.Name.toLowerCase().includes(val)
         );
 
         current = [...starts, ...contains];
@@ -329,7 +358,7 @@ function setupInputLogic() {
             return
         };
         insertGuess('.answers-container', { characterId: id, characterName: name });
-        used.add(id);
+        roundData.used.add(id);
         SharedTryController.decrementAll();
     }
 
@@ -494,6 +523,7 @@ function resetQuoteGame() {
     answersList.replaceChildren()
     if (roundData.audioPlayer) roundData.audioPlayer.destroy();
     roundData = {};
+    roundData.used = new Set()
     const [btnOneEl, btnTwoEl] = setupQuoteHint(quoteGame);
     hintOneContainer.replaceChildren(btnOneEl);
     hintTwoContainer.replaceChildren(btnTwoEl);
@@ -548,7 +578,7 @@ export function InitializeQuoteGame() {
     };
     const savedStreak = localStorage.getItem("WuWa_quote_user_scores");
     if (savedStreak) Object.assign(userStreak, JSON.parse(savedStreak));
-    document.querySelector('.game-streak').textContent = `Streak: ${userStreak.user_streak}`;
+    document.querySelector('.game-streak').textContent = `Streak: ${userStreak.user_streak ? userStreak.user_streak : 0}`;
     const guessBox = document.querySelector('.guessbox');
     ElementHiderById.register(1, guessBox);
     populateQuoteGame('.game-content')
