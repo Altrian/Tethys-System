@@ -221,11 +221,64 @@ function finishGame(characterId, name, result) {
     ElementHiderById.hide(1)
 }
 
-function setupInputLogic() {
-    const inputForm = document.getElementById('guess-input-form');
-    const input = inputForm.querySelector('#guess-input');
-    const pop = inputForm.querySelector("#guess-input-popover")
-    const list = inputForm.querySelector("#suggestions-list");
+function insertGuess(selector, guess = {}, correctGuess = false) {
+    const { characterId, characterName } = guess;
+
+    const container = document.querySelector(selector);
+    if (!container) return
+
+    const li = document.createElement('li');
+    li.className = "guess";
+    li.dataset.result = correctGuess;
+
+    const correctClasses = ['tada']
+    const incorrectClasses = ['headShake']
+    li.classList.add(...(correctGuess ? correctClasses : incorrectClasses))
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = "avatar-border"
+
+    const icon = document.createElement('img');
+    icon.className = "avatar"
+    icon.src = `/static/data/imgs/iconCircle/${characterId}.webp`;
+
+    iconContainer.appendChild(icon);
+
+    const span = document.createElement('span');
+    span.className = 'btn-text'
+    span.textContent = characterName;
+
+    li.appendChild(iconContainer);
+    li.appendChild(span);
+    container.appendChild(li)
+
+    // Define the handler separately so we can remove it later
+    const handleAnimationEnd = () => {
+        li.classList.remove(correctGuess ? 'tada' : 'headShake');
+        li.removeEventListener('animationend', handleAnimationEnd);
+    };
+
+    li.addEventListener('animationend', handleAnimationEnd);
+
+}
+
+function setupInputLogic({
+    handlers,
+    controllers = null,
+    suggestionList = [],
+    roundData = {},
+    elements = {
+        form: '#guess-input-form',
+        input: '#guess-input',
+        popover: '#guess-input-popover',
+        list: '#suggestions-list',
+        answerContainer: '.answers-container'
+    }
+}) {
+    const inputForm = document.querySelector(elements.form);
+    const input = inputForm.querySelector(elements.input);
+    const pop = inputForm.querySelector(elements.popover);
+    const list = inputForm.querySelector(elements.list);
 
     roundData.used = new Set()
     let current = [];
@@ -234,46 +287,7 @@ function setupInputLogic() {
     let activeEl = null; // keep reference to currently highlighted element
 
     // --- Helpers ---
-    function insertGuess(selector, guess = {}, correctGuess = false) {
-        const { characterId, characterName } = guess;
 
-        const container = document.querySelector(selector);
-        if (!container) return
-
-        const li = document.createElement('li');
-        li.className = "guess";
-        li.dataset.result = correctGuess;
-
-        const correctClasses = ['tada']
-        const incorrectClasses = ['headShake']
-        li.classList.add(...(correctGuess ? correctClasses : incorrectClasses))
-
-        const iconContainer = document.createElement('div');
-        iconContainer.className = "avatar-border"
-
-        const icon = document.createElement('img');
-        icon.className = "avatar"
-        icon.src = `/static/data/imgs/iconCircle/${characterId}.webp`;
-
-        iconContainer.appendChild(icon);
-
-        const span = document.createElement('span');
-        span.className = 'btn-text'
-        span.textContent = characterName;
-
-        li.appendChild(iconContainer);
-        li.appendChild(span);
-        container.appendChild(li)
-
-        // Define the handler separately so we can remove it later
-        const handleAnimationEnd = () => {
-            li.classList.remove(correctGuess ? 'tada' : 'headShake');
-            li.removeEventListener('animationend', handleAnimationEnd);
-        };
-
-        li.addEventListener('animationend', handleAnimationEnd);
-
-    }
 
     function createGuessElement({ id, name }) {
         const li = document.createElement('li');
@@ -315,8 +329,8 @@ function setupInputLogic() {
 
         const listEle = current.map(d => createGuessElement({ id: d.Id, name: d.Name }))
         list.replaceChildren(...listEle)
-        index = -1;
-        activeEl = null;
+        index = 0;
+        highlight(listEle);
 
         if (current.length) pop.showPopover();
         else pop.hidePopover();
@@ -348,18 +362,18 @@ function setupInputLogic() {
         console.log(`Character: ${name} selected`);
         if (id === roundData.selectedQuote.RoleId) {
             console.log("victory");
-            insertGuess('.answers-container', { characterId: id, characterName: name }, true);
-            finishGame(id, name, true);
+            handlers.insertGuess('.answers-container', { characterId: id, characterName: name }, true);
+            handlers.finishGame(id, name, true);
             return
         };
         if (roundData.remainingTries < 0) {
-            insertGuess('.answers-container', { characterId: id, characterName: name });
-            finishGame(id, name, false);
+            handlers.insertGuess('.answers-container', { characterId: id, characterName: name });
+            handlers.finishGame(id, name, false);
             return
         };
-        insertGuess('.answers-container', { characterId: id, characterName: name });
+        handlers.insertGuess('.answers-container', { characterId: id, characterName: name });
         roundData.used.add(id);
-        SharedTryController.decrementAll();
+        if (controllers.sharedTryController) controllers.sharedTryController.decrementAll();
     }
 
     // --- Event handling ---
@@ -413,20 +427,7 @@ function setupInputLogic() {
 
 }
 
-function setupQuoteHint(container) {
-    const langISO = {
-        'English': 'en',
-        'Japanese': 'ja',
-        'Korean': 'ko',
-        'Chinese': 'zh'
-    };
-    const langKeys = {
-        'English': 'CVNameEn',
-        'Japanese': 'CVNameJp',
-        'Korean': 'CVNameKo',
-        'Chinese': 'CVNameCn'
-    }
-    
+function setupQuoteHint(container) { 
 
     // --- Helpers ---
     function setupTryButton(btnClass, { initialTries, textFormatter = null, onReady = null }) {
@@ -453,16 +454,6 @@ function setupQuoteHint(container) {
         SharedTryController.register(state);
         button.append(textSpan);
         return button
-    }
-
-    function findVaInformation(items, characterId) {
-        return items.find(item => {
-            if (Array.isArray(item.Id)) {
-                return item.Id.includes(characterId);
-            } else {
-                return item.Id === characterId;
-            }
-        });
     }
 
     const hintOne = setupTryButton('btn extra-large btn-text va-name-btn', {
@@ -534,8 +525,8 @@ function resetQuoteGame() {
 async function setupQuoteGame() {
     roundData.remainingTries = 5;
 
-    const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)]
-    const characterId = randomQuote.character_id
+    const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)];
+    const characterId = randomQuote.character_id;
     const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
     const jsonFile = await fetch(`/static/data/json/characters/${characterId}.json`).then(res => res.json());
     roundData.vaInfo = ((f = jsonFile.favorRole) => ({ zh: f.CVNameCn?.Content ?? '', ja: f.CVNameJp?.Content ?? '', ko: f.CVNameKo?.Content ?? '', en: f.CVNameEn?.Content ?? '' }))();
@@ -545,8 +536,18 @@ async function setupQuoteGame() {
 
 export function InitializeQuoteGame() {
     function populateQuoteGame(containerSelector) {
-        const container = document.querySelector(containerSelector);
-        container.classList.add('quote-game');
+        const container = document.querySelector('.game-info');
+
+        const titleEl = container.querySelector('.game-title');
+        titleEl.textContent =  "Wuthering Waves: Quote Game";
+
+        const gameContentEl = container.querySelector(containerSelector);
+        gameContentEl.className = 'game-content'
+        gameContentEl.classList.add('quote-game');
+
+        const subtitleEl = document.createElement('div');
+        subtitleEl.className = 'quote-question'
+        subtitleEl.textContent =  "Which Character say this quote?";
 
         const quoteEl = document.createElement('div');
         quoteEl.className = 'quote';
@@ -567,7 +568,7 @@ export function InitializeQuoteGame() {
         hintOneEl.append(btnOneEl);
         hintTwoEl.append(btnTwoEl);
 
-        container.replaceChildren(quoteEl, radioEl, hintOneEl, hintTwoEl)
+        gameContentEl.replaceChildren(subtitleEl, quoteEl, radioEl, hintOneEl, hintTwoEl)
     }
 
     const langs = {
@@ -581,8 +582,10 @@ export function InitializeQuoteGame() {
     document.querySelector('.game-streak').textContent = `Streak: ${userStreak.user_streak ? userStreak.user_streak : 0}`;
     const guessBox = document.querySelector('.guessbox');
     ElementHiderById.register(1, guessBox);
-    populateQuoteGame('.game-content')
-    setupInputLogic();
+    populateQuoteGame('.game-content');
+    const handlers = { insertGuess: insertGuess, finishGame: finishGame };
+    const controllers = { sharedTryController: SharedTryController };
+    setupInputLogic({handlers, controllers, suggestionList, roundData });
     populateRadioGroup('.lang-radio', langs, 'va-lang');
     initializeRadioGroup('va-lang-select', 'en', (value) => {
         const quoteGame = document.querySelector('.quote-game');

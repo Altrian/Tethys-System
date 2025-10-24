@@ -599,15 +599,6 @@ small {
   justify-content: space-evenly;
 }
 
-.game-info .game-subtitle {
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5rem;
-  margin-bottom: .5rem;
-  text-align: center;
-  opacity: .75;
-}
-
 .game-info .game-content {
   width: 100%;
 }
@@ -618,6 +609,7 @@ small {
   gap: .5rem;
   grid-template-columns: 1fr;
   grid-template-areas:
+    "quote-question"
     "quote-text"
     "va-name"
     "audio-player";
@@ -625,6 +617,7 @@ small {
   @media (min-width: 40rem) {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
+      "quote-question quote-question"
       "quote-text quote-text"
       "va-name audio-player";
   }
@@ -632,6 +625,7 @@ small {
 
 .quote-game[data-hint-lang="true"] {
   grid-template-areas:
+    "quote-question"
     "quote-text"
     "lang-radio"
     "va-name"
@@ -639,6 +633,7 @@ small {
 
   @media (min-width: 40rem) {
     grid-template-areas:
+      "quote-question quote-question"
       "quote-text quote-text"
       "lang-radio lang-radio"
       "va-name audio-player";
@@ -647,6 +642,7 @@ small {
 
 .quote-game:has(>.result) {
   grid-template-areas:
+    "quote-question"
     "quote-text"
     "result"
     "lang-radio"
@@ -655,11 +651,22 @@ small {
 
   @media (min-width: 40rem) {
     grid-template-areas:
+      "quote-question quote-question"
       "quote-text quote-text"
       "result result"
       "lang-radio lang-radio"
       "va-name audio-player";
   }
+}
+
+.quote-game .quote-question {
+  grid-area: quote-question;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+  margin-bottom: .5rem;
+  text-align: center;
+  opacity: .75;
 }
 
 .quote-game .quote {
