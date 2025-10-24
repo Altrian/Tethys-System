@@ -23,11 +23,10 @@ const suggestionList = [
     { "Id": 1208, "Name": "Galbrena" }, { "Id": 1411, "Name": "Qiuyuan" }
 ];
 
-let winStreak = 0;
-let selectedQuote = null;
-let vaInfo = null;
-let audioPlayer = null;
-let remainingTries = null;
+
+let roundData = {};
+const userStreak = {};
+
 
 // Global controller shared by all buttons
 const SharedTryController = (() => {
@@ -98,11 +97,26 @@ const ElementHiderById = (() => {
 window.SharedTryController = SharedTryController;
 
 function finishGame(characterId, name, result) {
-    result ? winStreak++ : winStreak = 0;
-    document.querySelector('.game-streak').textContent = `Streak: ${winStreak}`;
+    // Ensure properties exist
+    userStreak.games_won ??= 0;
+    userStreak.games_played ??= 0;
+    userStreak.user_streak ??= 0;
+    userStreak.highest_streak ??= 0;
+
+    // Update values based on result
+    if (result) {
+        userStreak.games_won++;
+        userStreak.user_streak++;
+        if (userStreak.highest_streak < userStreak.user_streak) userStreak.highest_streak = userStreak.user_streak;
+    } else {
+        userStreak.user_streak = 0;
+    }
+    userStreak.games_played++;
+    localStorage.setItem("WuWa_quote_user_scores", JSON.stringify(userStreak));
+    document.querySelector('.game-streak').textContent = `Streak: ${userStreak.user_streak}`;
     const quoteGame = document.querySelector('.quote-game');
     function createResultElement(characterId, name, result, onNext = null) {
-        const numberTries = 5 - remainingTries;
+        const numberTries = 5 - roundData.remainingTries;
         const imgSrc = `/static/data/imgs/iconCircle/${characterId}.webp`
 
         const resultElement = document.createElement('div');
@@ -301,15 +315,15 @@ function setupInputLogic() {
         input.value = name;
         input.value = '';
         pop.hidePopover();
-        remainingTries--;
+        roundData.remainingTries--;
         console.log(`Character: ${name} selected`);
-        if (id === selectedQuote.RoleId) {
+        if (id === roundData.selectedQuote.RoleId) {
             console.log("victory");
             insertGuess('.answers-container', { characterId: id, characterName: name }, true);
             finishGame(id, name, true);
             return
         };
-        if (remainingTries < 0) {
+        if (roundData.remainingTries < 0) {
             insertGuess('.answers-container', { characterId: id, characterName: name });
             finishGame(id, name, false);
             return
@@ -429,16 +443,15 @@ function setupQuoteHint(container) {
             btn.querySelector('.va-label').textContent = 'Click to reveal';
             btn.addEventListener('click', () => {
                 if (btn.querySelector('.va-label').textContent != 'Click to reveal') return
-                if (!vaInfo) vaInfo = findVaInformation(vaData, selectedQuote.RoleId)
-                console.log(vaInfo)
+                console.log(roundData.vaInfo)
                 console.log("Toggling hint language", container);
                 if (!localStorage.getItem('va-lang-select') || localStorage.getItem('va-lang-select') === 'English') {
-                    btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select') || 'English']}`;
+                    btn.querySelector('.va-label').textContent = `Voice Actor: ${roundData.vaInfo[localStorage.getItem('va-lang-select') || 'English']}`;
                 } else {
-                    btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select')]}`;
+                    btn.querySelector('.va-label').textContent = `Voice Actor: ${roundData.vaInfo[localStorage.getItem('va-lang-select')]}`;
                 }
-                if (audioPlayer) {
-                    audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`);
+                if (roundData.audioPlayer) {
+                    roundData.audioPlayer.setSource(`/static/data/voices/${roundData.selectedQuote.RoleId}/${roundData.selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`);
                 }
                 if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
             });
@@ -454,8 +467,8 @@ function setupQuoteHint(container) {
                 if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
                 const audioPlayerElement = document.createElement('div');
                 audioPlayerElement.className = 'audio-player simple';
-                audioPlayer = createAudioPlayer(audioPlayerElement, {
-                    src: `/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`,
+                roundData.audioPlayer = createAudioPlayer(audioPlayerElement, {
+                    src: `/static/data/voices/${roundData.selectedQuote.RoleId}/${roundData.selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`,
                     playerId: 'player',
                     showProgress: false,
                     showTime: false,
@@ -479,9 +492,8 @@ function resetQuoteGame() {
 
     quoteGame.dataset.hintLang = 'false'
     answersList.replaceChildren()
-    if (audioPlayer) audioPlayer.destroy();
-    vaInfo = null;
-    remainingTries = null;
+    if (roundData.audioPlayer) roundData.audioPlayer.destroy();
+    roundData = {};
     const [btnOneEl, btnTwoEl] = setupQuoteHint(quoteGame);
     hintOneContainer.replaceChildren(btnOneEl);
     hintTwoContainer.replaceChildren(btnTwoEl);
@@ -490,15 +502,15 @@ function resetQuoteGame() {
 }
 
 async function setupQuoteGame() {
-    remainingTries = 5;
+    roundData.remainingTries = 5;
 
     const randomQuote = manifest.files[Math.floor(Math.random() * manifest.files.length)]
     const characterId = randomQuote.character_id
     const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
     const jsonFile = await fetch(`/static/data/json/characters/${characterId}.json`).then(res => res.json());
-    vaInfo = ((f = jsonFile.favorRole) => ({ zh: f.CVNameCn?.Content ?? '', ja: f.CVNameJp?.Content ?? '', ko: f.CVNameKo?.Content ?? '', en: f.CVNameEn?.Content ?? '' }))();
-    selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
-    document.querySelector('.quote').replaceChildren(formatDialogueText(selectedQuote.Content));
+    roundData.vaInfo = ((f = jsonFile.favorRole) => ({ zh: f.CVNameCn?.Content ?? '', ja: f.CVNameJp?.Content ?? '', ko: f.CVNameKo?.Content ?? '', en: f.CVNameEn?.Content ?? '' }))();
+    roundData.selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
+    document.querySelector('.quote').replaceChildren(formatDialogueText(roundData.selectedQuote.Content));
 }
 
 export function InitializeQuoteGame() {
@@ -528,18 +540,15 @@ export function InitializeQuoteGame() {
         container.replaceChildren(quoteEl, radioEl, hintOneEl, hintTwoEl)
     }
 
-    const langISO = {
-        'English': 'en',
-        'Japanese': 'ja',
-        'Korean': 'ko',
-        'Chinese': 'zh'
-    };
     const langs = {
         'en': 'English',
         'ja': 'Japanese',
         'zh': 'Chinese',
         'ko': 'Korean'
     };
+    const savedStreak = localStorage.getItem("WuWa_quote_user_scores");
+    if (savedStreak) Object.assign(userStreak, JSON.parse(savedStreak));
+    document.querySelector('.game-streak').textContent = `Streak: ${userStreak.user_streak}`;
     const guessBox = document.querySelector('.guessbox');
     ElementHiderById.register(1, guessBox);
     populateQuoteGame('.game-content')
@@ -552,12 +561,12 @@ export function InitializeQuoteGame() {
         if (btnEl.disabled) return
         if (vaLabel.textContent === 'Click to reveal') return
         if (value === 'English') {
-            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
+            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${roundData.vaInfo != null ? roundData.vaInfo[value] : 'Unknown'}`;
         } else {
-            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
+            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${roundData.vaInfo != null ? roundData.vaInfo[value] : 'Unknown'}`;
         }
-        if (audioPlayer) {
-            audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${value}.mp3`);
+        if (roundData.audioPlayer) {
+            roundData.audioPlayer.setSource(`/static/data/voices/${roundData.selectedQuote.RoleId}/${roundData.selectedQuote.Id}_${value}.mp3`);
         }
     });
     setupQuoteGame();
