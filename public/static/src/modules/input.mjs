@@ -62,7 +62,7 @@ export function populateRadioGroup(containerSelector, dataObj, groupName) {
 		input.type = 'radio';
 		input.id = key.toLowerCase();
 		input.name = groupName;
-		input.value = labelText;
+		input.value = key;
 		input.className = 'radio-input';
 		input.hidden = true;
 

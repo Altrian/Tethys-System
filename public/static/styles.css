@@ -596,6 +596,7 @@ small {
 
 .game-info .game-stats {
   display: flex;
+  justify-content: space-evenly;
 }
 
 .game-info .game-subtitle {

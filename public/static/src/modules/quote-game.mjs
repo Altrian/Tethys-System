@@ -99,7 +99,7 @@ window.SharedTryController = SharedTryController;
 
 function finishGame(characterId, name, result) {
     result ? winStreak++ : winStreak = 0;
-    document.querySelector('.game-streak').textContent = winStreak;
+    document.querySelector('.game-streak').textContent = `Streak: ${winStreak}`;
     const quoteGame = document.querySelector('.quote-game');
     function createResultElement(characterId, name, result, onNext = null) {
         const numberTries = 5 - remainingTries;
@@ -377,6 +377,12 @@ function setupQuoteHint(container) {
         'Korean': 'ko',
         'Chinese': 'zh'
     };
+    const langKeys = {
+        'English': 'CVNameEn',
+        'Japanese': 'CVNameJp',
+        'Korean': 'CVNameKo',
+        'Chinese': 'CVNameCn'
+    }
     
 
     // --- Helpers ---
@@ -429,10 +435,10 @@ function setupQuoteHint(container) {
                 if (!localStorage.getItem('va-lang-select') || localStorage.getItem('va-lang-select') === 'English') {
                     btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select') || 'English']}`;
                 } else {
-                    btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select')].name}`;
+                    btn.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo[localStorage.getItem('va-lang-select')]}`;
                 }
                 if (audioPlayer) {
-                    audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'english']}.mp3`);
+                    audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`);
                 }
                 if (container.dataset.hintLang != 'true') container.dataset.hintLang = 'true';
             });
@@ -449,7 +455,7 @@ function setupQuoteHint(container) {
                 const audioPlayerElement = document.createElement('div');
                 audioPlayerElement.className = 'audio-player simple';
                 audioPlayer = createAudioPlayer(audioPlayerElement, {
-                    src: `/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[localStorage.getItem('va-lang-select') || 'English']}.mp3`,
+                    src: `/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${localStorage.getItem('va-lang-select')}.mp3`,
                     playerId: 'player',
                     showProgress: false,
                     showTime: false,
@@ -490,6 +496,7 @@ async function setupQuoteGame() {
     const characterId = randomQuote.character_id
     const quoteId = parseInt(randomQuote.filename.match(/^(\d+)_/)[1], 10);
     const jsonFile = await fetch(`/static/data/json/characters/${characterId}.json`).then(res => res.json());
+    vaInfo = ((f = jsonFile.favorRole) => ({ zh: f.CVNameCn?.Content ?? '', ja: f.CVNameJp?.Content ?? '', ko: f.CVNameKo?.Content ?? '', en: f.CVNameEn?.Content ?? '' }))();
     selectedQuote = jsonFile.Words.find(quote => quote.Id === quoteId)
     document.querySelector('.quote').replaceChildren(formatDialogueText(selectedQuote.Content));
 }
@@ -528,17 +535,17 @@ export function InitializeQuoteGame() {
         'Chinese': 'zh'
     };
     const langs = {
-        'english': 'English',
-        'japanese': 'Japanese',
-        'chinese': 'Chinese',
-        'korean': 'Korean'
+        'en': 'English',
+        'ja': 'Japanese',
+        'zh': 'Chinese',
+        'ko': 'Korean'
     };
     const guessBox = document.querySelector('.guessbox');
     ElementHiderById.register(1, guessBox);
     populateQuoteGame('.game-content')
     setupInputLogic();
     populateRadioGroup('.lang-radio', langs, 'va-lang');
-    initializeRadioGroup('va-lang-select', 'English', (value) => {
+    initializeRadioGroup('va-lang-select', 'en', (value) => {
         const quoteGame = document.querySelector('.quote-game');
         const btnEl = quoteGame.querySelector('.hint-one > .btn')
         const vaLabel = quoteGame.querySelector('.hint-one .va-label');
@@ -547,10 +554,10 @@ export function InitializeQuoteGame() {
         if (value === 'English') {
             quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
         } else {
-            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value].name : 'Unknown'}`;
+            quoteGame.querySelector('.va-label').textContent = `Voice Actor: ${vaInfo != null ? vaInfo[value] : 'Unknown'}`;
         }
         if (audioPlayer) {
-            audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${langISO[value]}.mp3`);
+            audioPlayer.setSource(`/static/data/voices/${selectedQuote.RoleId}/${selectedQuote.Id}_${value}.mp3`);
         }
     });
     setupQuoteGame();
